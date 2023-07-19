@@ -16,8 +16,7 @@ public class PuzzleSolver {
 
         Scanner scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
-        scanner.close();
-        
+
         switch (choice) {
             case 1:
                 initstate = new int[][]{{1, 2, 3}, 
@@ -75,5 +74,6 @@ public class PuzzleSolver {
 
         Problem problem = new Problem(initstate, choice);
         Search.AStarSearch(problem);
+        scanner.close();
     }
 }
