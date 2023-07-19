@@ -49,18 +49,10 @@ public class Search {
         }
         System.out.println("---------");
     }
-    // helper function to print path to goal
-    public static void printPath(Node node) {
-        if (node.move == "ROOT") {
-            printState(node.state);
-            return;
-        }
-        printPath(node.parent);
-        printState(node.state);
-        System.out.println(node.move);
-    }
+    
     // A* search algorithm using euclidean distance that takes in a problem and prints the path to the goal
     public static void AStarSearch(Problem problem) {
+        int count = 0;
         PriorityQueue<Node> frontier = new PriorityQueue<Node>(new NodeComparator());
         Map<String, Boolean> visited = new HashMap<String, Boolean>();
         Node root = new Node(problem.initstate);
@@ -72,17 +64,21 @@ public class Search {
         root.h = h(root.state, problem.goalstate);
         root.f = root.cost + root.h;
         frontier.add(root);
-        Node up = new Node(problem.up(root.state), root, "UP", h(problem.up(root.state), problem.goalstate));
-        Node down = new Node(problem.down(root.state), root, "DOWN", h(problem.down(root.state), problem.goalstate));
-        Node left = new Node(problem.left(root.state), root, "LEFT", h(problem.left(root.state), problem.goalstate));
-        Node right = new Node(problem.right(root.state), root, "RIGHT", h(problem.right(root.state), problem.goalstate));
+        
+        int[][] upstate = problem.up(root.state);
+        int[][] downstate = problem.down(root.state);
+        int[][] leftstate = problem.left(root.state);
+        int[][] rightstate = problem.right(root.state);
+
+        Node up = new Node(upstate, root, "UP", h(upstate, problem.goalstate));
+        Node down = new Node(downstate, root, "DOWN", h(downstate, problem.goalstate));
+        Node left = new Node(leftstate, root, "LEFT", h(leftstate, problem.goalstate));
+        Node right = new Node(rightstate, root, "RIGHT", h(rightstate, problem.goalstate));
 
         root.up = up;
         root.down = down;
         root.left = left;
         root.right = right;
-
-        System.out.println(Arrays.deepToString(up.state));
 
         visited.put(Arrays.deepToString(up.state), true);
         visited.put(Arrays.deepToString(down.state), true);
@@ -97,45 +93,50 @@ public class Search {
 
         while (!frontier.isEmpty()) {
             Node node = frontier.poll();
-
+            count++;
             System.out.println("The best state to expand with a g(n) = " + node.cost + " and h(n) = " + node.h + " is...");
             printState(node.state);
+            System.out.println(node.move);
             System.out.println("Expanding this node...");
             System.out.println();
 
             if (Arrays.deepEquals(node.state,problem.goalstate)) {
                 System.out.println("Goal!!!");
-                System.out.println("Printing path to goal...");
-                printPath(node);
+                System.out.println("Expanded a total of " + count + " nodes.");
                 return;
             }
-            
-            if (!visited.containsKey(Arrays.deepToString(problem.up(node.state)))) {
-                up = new Node(problem.up(node.state), node, "UP", h(problem.up(node.state), problem.goalstate));
+
+            upstate = problem.up(node.state);
+            downstate = problem.down(node.state);
+            leftstate = problem.left(node.state);
+            rightstate = problem.right(node.state);
+
+            if (!visited.containsKey(Arrays.deepToString(upstate))) {
+                up = new Node(upstate, root, "UP", h(upstate, problem.goalstate));
                 node.up = up;
                 visited.put(Arrays.deepToString(up.state), true);
                 frontier.add(up);
             }
-            if (!visited.containsKey(Arrays.deepToString(problem.down(node.state)))) {
-                down = new Node(problem.down(node.state), node, "DOWN", h(problem.down(node.state), problem.goalstate));
+            if (!visited.containsKey(Arrays.deepToString(downstate))) {
+                down = new Node(downstate, root, "DOWN", h(downstate, problem.goalstate));
                 node.down = down;
                 visited.put(Arrays.deepToString(down.state), true);
                 frontier.add(down);
             }
-            if (!visited.containsKey(Arrays.deepToString(problem.left(node.state)))) {
-                left = new Node(problem.left(node.state), node, "LEFT", h(problem.left(node.state), problem.goalstate));
+            if (!visited.containsKey(Arrays.deepToString(leftstate))) {
+                left = new Node(leftstate, root, "LEFT", h(leftstate, problem.goalstate));
                 node.left = left;
                 visited.put(Arrays.deepToString(left.state), true);
                 frontier.add(left);
             }
-            if (!visited.containsKey(Arrays.deepToString(problem.left(node.state)))) {
-                right = new Node(problem.right(node.state), node, "RIGHT", h(problem.right(node.state), problem.goalstate));
+            if (!visited.containsKey(Arrays.deepToString(rightstate))) {
+                right = new Node(rightstate, root, "RIGHT", h(rightstate, problem.goalstate));
                 node.right = right;
                 visited.put(Arrays.deepToString(right.state), true);
                 frontier.add(right);
             }
         }
-
+        System.out.println("No solution found");
     }
 
 }
